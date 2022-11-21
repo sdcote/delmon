@@ -1,0 +1,152 @@
+version: '2.1'
+
+networks:
+  back-tier:
+    driver: bridge
+
+volumes:
+    prometheus_data: {}
+    grafana_data: {}
+
+services:
+
+  prometheus:
+    image: prom/prometheus:v2.30.3
+    container_name: prometheus
+    volumes:
+      - ./prometheus/:/etc/prometheus/
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+      - '--web.external-url=http://hostnamehere:9090/'
+    restart: unless-stopped
+    expose:
+      - 9090
+    networks:
+      - back-tier
+
+  alertmanager:
+    image: prom/alertmanager:v0.23.0
+    container_name: alertmanager
+    volumes:
+      - ./alertmanager/:/etc/alertmanager/
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.external-url=http://hostnameHere:9093/'
+    restart: unless-stopped
+    expose:
+      - 9093
+    networks:
+      - back-tier
+
+  nodeexporter:
+    image: prom/node-exporter:v1.2.2
+    container_name: nodeexporter
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - c:\:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
+    restart: unless-stopped
+    expose:
+      - 9100
+    networks:
+      - back-tier
+
+  blackbox_exporter:
+    image: prom/blackbox-exporter:v0.19.0
+    container_name: blackbox
+    volumes:
+      - ./blackbox:/etc/blackbox_exporter
+    restart: unless-stopped
+    expose:
+      - 9115
+    networks:
+      - back-tier
+
+  grafana:
+    image: grafana/grafana:8.2.2
+    container_name: grafana
+    volumes:
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources/
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards/
+      - ./grafana/lib:/var/lib/grafana/
+      - ./grafana/grafana.ini:/etc/grafana/grafana.ini
+      - ./grafana/ldap.toml:/etc/grafana/ldap.toml
+    environment:
+      - GF_SECURITY_ADMIN_USER=${ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-changeme}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    restart: unless-stopped
+    expose:
+      - 3000
+    networks:
+      - back-tier
+
+  cadvisor:
+    image: google/cadvisor:v0.33.0
+    container_name: cadvisor
+    volumes:
+      - c:\:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      #- /cgroup:/cgroup:ro #doesn't work on MacOS only for Linux
+    restart: unless-stopped
+    expose:
+      - 8080
+    networks:
+      - back-tier
+
+  pushgateway:
+    image: prom/pushgateway:v1.4.2
+    container_name: pushgateway
+    restart: unless-stopped
+    expose:
+      - 9091
+    networks:
+      - back-tier
+
+  coyote:
+    image: coyotesys/coyote:0.8.5
+    container_name: coyote
+    volumes:
+      - ./coyote/:/opt/coyotedx/cfg/
+    command:
+      - 'webhook'
+    restart: unless-stopped
+    expose:
+      - 9080
+      - 55290
+    networks:
+      - back-tier
+
+  caddy:
+    image: coyotesys/caddy:1.0.4
+    container_name: caddy
+    ports:
+      - "3000:3000"
+      - "9090:9090"
+      - "9093:9093"
+      - "9091:9091"
+      - "9115:9115"
+    volumes:
+      - ./caddy/:/etc/caddy/
+    environment:
+      - PROXY_USER=${PROXY_USER:-admin}
+      - PROXY_PASSWORD=${PROXY_PASSWORD:-changeme}
+      - PUSH_USER=${PUSH_USER:-pushuser}
+      - PUSH_PASSWORD=${PUSH_PASSWORD:-changeme}
+    restart: unless-stopped
+    networks:
+      - back-tier

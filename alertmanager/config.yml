@@ -1,0 +1,22 @@
+global:
+  # The smarthost and SMTP sender used for mail notifications.
+  smtp_smarthost: 'mailmta.aepsc.com:25'
+  smtp_from: 'prometheus@aep.com'
+  smtp_require_tls: false
+
+route:
+  receiver: 'webhook'
+
+receivers:
+  # This is a simple email notification
+  - name: 'email'
+    email_configs:
+      - to: 'GroupName@aep.com'
+      - to: 'Someone@aep.com'
+
+  # This is the webhook integration point. Coyote is configured with endpoints
+  # to enable bridging between AlertManager and any other system you need.
+  - name: 'webhook'
+    webhook_configs:
+      - url: 'http://coyote:9080/webex'
+

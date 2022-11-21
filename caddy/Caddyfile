@@ -1,0 +1,48 @@
+:9090 {
+    basicauth / {$PROXY_USER} {$PROXY_PASSWORD}
+    proxy / prometheus:9090 {
+            transparent
+        }
+
+    errors stderr
+    tls off
+}
+
+:9093 {
+    basicauth / {$PROXY_USER} {$PROXY_PASSWORD}
+    proxy / alertmanager:9093 {
+            transparent
+        }
+
+    errors stderr
+    tls off
+}
+
+:9115 {
+    basicauth / {$PROXY_USER} {$PROXY_PASSWORD}
+    proxy / blackbox:9115 {
+            transparent
+        }
+
+    errors stderr
+    tls off
+}
+:9091 {
+    basicauth / {$PUSH_USER} {$PUSH_PASSWORD}
+    proxy / pushgateway:9091 {
+            transparent
+        }
+
+    errors stderr
+    tls off
+}
+
+:3000 {
+    proxy / grafana:3000 {
+            transparent
+            websocket
+        }
+
+    errors stderr
+    tls off
+}
