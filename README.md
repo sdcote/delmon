@@ -34,11 +34,11 @@ To get started quickly, follow the following three steps:
 Clone this repository on your Docker host, cd into `devopsmon` directory and run `compose up`:
 
 ```
-git clone https://github.aepsc.com/s180313/devopsmon
-cd devopsmon
+git clone https://github.com/sdcote/delmon.git
+cd delmon
 docker-compose up -d
 ```
-For new installs, Docker will start downloading the container images for the products listed above. These are currently being taken from DockerHub but in the future, these images will probably be official AEP images vetted by our security and operations teams.  
+For new installs, Docker will start downloading the container images for the products listed above. These are currently being taken from DockerHub but in the future, these images should probably be official images vetted by your security and operations teams and hosted in the corporate artifact repositry.  
 
 This will get everything installed using the default usernames and passwords. _**Only use this for testing and experimentation**_
 
@@ -199,11 +199,11 @@ After installing plugins, you may need to restart Grafana with `sudo docker rest
 
 ## Define alerts
 
-Three alert groups have been setup within the [alert.rules](https://github.aepsc.com/s180313/devopsmon/blob/master/prometheus/alert.rules) configuration file:
+Three alert groups have been setup within the [alert.rules](https://github.com/sdcote/delmon/blob/main/prometheus/alert.rules) configuration file:
 
-* Monitoring services alerts [targets](https://github.aepsc.com/s180313/devopsmon/blob/master/prometheus/alert.rules#L2-L11)
-* Docker Host alerts [host](https://github.aepsc.com/s180313/devopsmon/blob/master/prometheus/alert.rules#L13-L40)
-* Docker Containers alerts [containers](https://github.aepsc.com/s180313/devopsmon/blob/master/prometheus/alert.rules#L42-L69)
+* Monitoring services alerts [targets](https://github.com/sdcote/delmon/blob/main/prometheus/alert.rules#L2-L11)
+* Docker Host alerts [host](https://github.com/sdcote/delmon/blob/main/prometheus/alert.rules#L13-L40)
+* Docker Containers alerts [containers](https://github.com/sdcote/delmon/blob/main/prometheus/alert.rules#L42-L69)
 
 You can modify the alert rules and reload them by making a HTTP POST call to Prometheus:
 
@@ -318,7 +318,7 @@ A complete list of integrations can be found [here](https://prometheus.io/docs/a
 
 You can view and silence notifications by accessing `http://<host-ip>:9093`.
 
-The notification receivers can be configured in [alertmanager/config.yml](https://github.aepsc.com/s180313/devopsmon/blob/master/alertmanager/config.yml) file.
+The notification receivers can be configured in [alertmanager/config.yml](https://github.com/sdcote/delmon/blob/main/alertmanager/config.yml) file.
 
 To receive alerts via Slack you need to make a custom integration by choosing ***incoming web hooks*** in your Slack team app page.
 You can find more details on setting up Slack integration [here](http://www.robustperception.io/using-slack-with-the-alertmanager/).
@@ -342,7 +342,7 @@ receivers:
 
 The `docker-compose.yml` contains a command line option (line 40) that specifies your external web URL to the AlertManager. Change this to reflect the URL that should be used to reach AlertManager. 
 
-You may want to change the [reverse proxy configuration file](https://github.aepsc.com/s180313/devopsmon/blob/master/caddy/Caddyfile) to allow unauthenticated access to the AlertManager since there is little that can be changed from the AlertManager UI apart from silencing alerts. 
+You may want to change the [reverse proxy configuration file](https://github.com/sdcote/delmon/blob/main/caddy/Caddyfile) to allow unauthenticated access to the AlertManager since there is little that can be changed from the AlertManager UI apart from silencing alerts. 
 
 ## Sending metrics to the Pushgateway
 
