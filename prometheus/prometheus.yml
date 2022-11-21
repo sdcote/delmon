@@ -42,12 +42,7 @@ scrape_configs:
       module: [http_get_2xx]
     static_configs:
       - targets:
-          - https://aepdeveloper.aepsc.com
-          - https://rtfx.aepsc.com
-          - https://rtfx-test.aepsc.com
-          - https://ecdp3.aepsc.com/jenkins
-          - https://ecdt3.aepsc.com/jenkins
-          - https://github.aepsc.com
+          - https://github.myorg.com
           - https://google.com
     relabel_configs:
       - source_labels: [__address__]
